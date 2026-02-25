@@ -4,7 +4,7 @@ exports.handler = async (event, context) => {
     }
 
     const { title, content } = JSON.parse(event.body);
-    const TOKEN = process.env.GITHUB_TOKEN;
+    const TOKEN = process.env.site80_token;
 
     const response = await fetch('https://api.github.com/repos/teata99/site82/issues', {
         method: 'POST',
