@@ -9,8 +9,9 @@ exports.handler = async (event, context) => {
     const response = await fetch('https://api.github.com/repos/teata99/site82/issues', {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${TOKEN}`,
-            'Content-Type': 'application/json',
+            "Authorization": `token ${TOKEN}`,
+            "Content-Type": "application/json",
+            "Accept": "application/vnd.github.v3+json"
         },
         body: JSON.stringify({ title, body: content })
 
@@ -25,3 +26,5 @@ exports.handler = async (event, context) => {
     
 };
 
+
+            
