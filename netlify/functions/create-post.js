@@ -1,4 +1,14 @@
 exports.handler = async (event, context) => {
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+    };
+
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 200, headers, body: 'OK' };
+    }
+
     if (event.httpMethod !== "POST") {
         return { statusCode: 405, body: "Method Not Allowed" };
     }
@@ -20,8 +30,9 @@ exports.handler = async (event, context) => {
     const data = await response.json();
 
     return {
-        statusCode: 200,
-        body: JSON.stringify({ message: "성공적으로 게시되었습니다!", url: data.html_url })
+        statusCode: response.status,
+        headers,
+        body: JSON.stringify(data)
     };
     
 };
