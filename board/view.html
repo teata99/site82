@@ -51,7 +51,7 @@
           <i class="bi bi-arrow-left"></i> 목록으로
         </a>
 
-        <div class="d-flex gap-2">
+        <div id="owner-only" class="d-none d-flex gap-2">
           <a id="edit-btn" href="#" class="btn btn-outline-primary">
             <i class="bi bi-pencil"></i> 수정
           </a>
@@ -113,8 +113,19 @@ fetch("/sidebar.html")
       document.getElementById('post-title').innerText = post.title;
       document.getElementById('post-author').innerText = post.user.login;
       document.getElementById('post-date').innerText = new Date(post.created_at).toLocaleString();
-      console.log(post.body);
       document.getElementById('post-content').innerText = post.body || "";
+
+      const userInfo = localStorage.getItem('user_info');
+
+      if (userInfo) {
+        const loginUser = JSON.parse(userInfo).login;
+        const postOwner = post.user.login;
+
+        if (loginUser === postOwner) {
+          document.getElementById('owner-only').classList.remove('d-none');
+          document.getElementById('edit-btn').href = `edit.html?id=${issueNumber}`;
+        }
+      }
 
     } catch(error) {
         console.error(error);
@@ -123,6 +134,20 @@ fetch("/sidebar.html")
   }
 
   async function deletePost() {
+    const userInfo = localStorage.getItem('user_info');
+    if (!userInfo) {
+        alert("로그인이 필요합니다.");
+        return;
+    }
+
+    const loginUser = JSON.parse(userInfo).login;
+    const postOwner = document.getElementById('post-author').innerText;
+
+    if (loginUser !== postOwner) {
+        alert("본인이 작성한 글만 삭제할 수 있습니다.");
+        return;
+    }
+
     if (!confirm("정말 이 게시글을 삭제하시겠습니까?")) {
         return;
     }
@@ -139,7 +164,7 @@ fetch("/sidebar.html")
 
         if (response.ok) {
             alert("게시글이 삭제되었습니다.\n반영되는 데 시간이 걸릴수 있습니다.\n반영이 안된 경우 새로고침을 눌러주세요.");
-            location.href = "list.html"; 
+            location.href = "/board/list.html"; 
         } else {
             const errData = await response.json();
             alert("삭제 실패: " + (errData.message || "권한이 없습니다."));

@@ -79,6 +79,16 @@ fetch("/sidebar.html")
   const issueNumber = urlParams.get('id');
 
   async function loadPostData() {
+    const userInfo = localStorage.getItem('user_info');
+
+    if (!userInfo) {
+        alert("로그인이 필요합니다.");
+        location.href = "/board/list.html";
+        return;
+    }
+
+    const loginUser = JSON.parse(userInfo).login;
+
     if (!issueNumber) {
         alert("수정할 글 번호가 없습니다.");
         location.href = "/board/list.html";
@@ -90,6 +100,12 @@ fetch("/sidebar.html")
       if (!response.ok) throw new Error("글을 불러올 수 없습니다.");
 
       const post = await response.json();
+
+      if (post.user.login !== loginUser) {
+            alert("본인의 글만 수정할 수 있습니다.");
+            location.href = "/board/list.html";
+            return;
+      }
 
       document.getElementById('title').value = post.title;
       document.getElementById('content').value = post.body;
