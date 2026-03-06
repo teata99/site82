@@ -6,27 +6,40 @@ exports.handler = async (event, context) => {
         'Access-Control-Allow-Methods': 'POST, OPTIONS'
     };
 
-    if (event.httpMethod !== "POST") {
-        return { statusCode: 405, body: "Method Not Allowed" };
+    if (event.httpMethod === "OPTIONS") {
+        return { statusCode: 204, headers };
     }
 
-    const { issueNumber } = JSON.parse(event.body);
-    const TOKEN = process.env.site82_token;
+    if (event.httpMethod !== "POST") {
+        return { statusCode: 405, headers, body: "Method Not Allowed" };
+    }
 
-    const response = await fetch(`https://api.github.com/repos/teata99/site82/issues/${issueNumber}`, {
-        method: 'PATCH', // 상태를 수정하므로 PATCH 사용
-        headers: {
-            "Authorization": `token ${TOKEN}`,
-            "Content-Type": "application/json",
-            "Accept": "application/vnd.github.v3+json"
-        },
-        body: JSON.stringify({ state: 'closed' }) 
-    });
+    try {
+        const { issueNumber } = JSON.parse(event.body);
+        const TOKEN = process.env.site82_token;
 
-    const data = await response.json();
+        const response = await fetch(`https://api.github.com/repos/teata99/site82/issues/${issueNumber}`, {
+            method: 'PATCH', // 상태를 수정하므로 PATCH 사용
+            headers: {
+                "Authorization": `token ${TOKEN}`,
+                "Content-Type": "application/json",
+                "Accept": "application/vnd.github.v3+json"
+            },
+            body: JSON.stringify({ state: 'closed' }) 
+        });
 
-    return {
-        statusCode: response.status,
-        body: JSON.stringify({ message: "삭제(종료) 되었습니다.", data })
-    };
+        const data = await response.json();
+
+        return {
+            statusCode: response.status,
+            headers,
+            body: JSON.stringify({ message: "삭제(종료) 되었습니다.", data })
+        };
+    } catch (error) {
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ message: error.message })
+        };
+    }
 };
